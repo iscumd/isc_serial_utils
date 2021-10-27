@@ -16,7 +16,7 @@ catkin_package(
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 ## serial_listener library
-add_library(serial_listener src/serial_listener.cc)
+##add_library(serial_listener src/serial_listener.cc)
 target_link_libraries(serial_listener ${serial_LIBRARIES} ${Boost_LIBRARIES})
 
 install(TARGETS serial_listener

@@ -1,17 +1,64 @@
-cmake_minimum_required(VERSION 2.4.6)
+cmake_minimum_required(VERSION 3.5)
+project(serial_utils)
 
-find_package(catkin)
-
-option(SERIAL_UTILS_BUILD_WIHOUT_ROS "Build without ROS?" OFF)
-
-if(${catkin_FOUND} AND NOT SERIAL_UTILS_BUILD_WIHOUT_ROS)
-  # Build with ROS
-  include(serial_utils_ros.cmake)
-  # message("Building with ROS")
-  build_serial_utils()
-else()
-  # Build normally
-  include(serial_utils.cmake)
-  message("Building stand alone")
-  build_serial_utils()
+# Default to C99
+if(NOT CMAKE_C_STANDARD)
+  set(CMAKE_C_STANDARD 99)
 endif()
+
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+find_package(ament_cmake REQUIRED)
+find_package(serial REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(Boost 1.71 REQUIRED COMPONENTS thread)
+
+add_library(${PROJECT_NAME}
+    src/serial_listener.cc
+    include/serial/utils/serial_listener.h
+    include/serial/utils/concurrent_queue.h
+)
+
+## Sources
+## Add serial library
+
+ament_target_dependencies(
+  serial_utils serial 
+  Boost
+  rclcpp
+)
+
+target_include_directories(serial_utils
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+    
+target_link_libraries(serial_utils Boost::thread)
+
+## Install executable
+install(TARGETS ${PROJECT_NAME}
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+)
+
+## Install headers
+install(FILES include/serial/utils/serial_listener.h include/serial/utils/concurrent_queue.h
+    DESTINATION include/serial/utils
+)
+
+ament_export_libraries(${PROJECT_NAME})
+ament_export_include_directories(include)
+
+## Tests
+#if(BUILD_TESTING)
+#    add_subdirectory(tests)
+#endif()
+
+ament_package()
