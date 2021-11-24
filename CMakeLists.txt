@@ -1,5 +1,14 @@
 cmake_minimum_required(VERSION 3.5)
 project(serial_utils)
+include(FetchContent)
+include(CMakePrintHelpers)
+include(cmake/CPM.cmake)
+
+CPMAddPackage(
+  NAME serial
+  GIT_REPOSITORY https://github.com/andyblarblar/serial-ros2
+  GIT_TAG master
+)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -16,9 +25,8 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-find_package(serial REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(Boost 1.71 REQUIRED COMPONENTS thread)
+find_package(Boost 1.71 CONFIG REQUIRED COMPONENTS thread)
 
 add_library(${PROJECT_NAME}
     src/serial_listener.cc
@@ -30,17 +38,18 @@ add_library(${PROJECT_NAME}
 ## Add serial library
 
 ament_target_dependencies(
-  serial_utils serial 
+  serial_utils
   Boost
   rclcpp
 )
 
+target_link_libraries(serial_utils Boost::thread serial)
+
 target_include_directories(serial_utils
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>)
-    
-target_link_libraries(serial_utils Boost::thread)
+    $<INSTALL_INTERFACE:include>
+    )
 
 ## Install executable
 install(TARGETS ${PROJECT_NAME}
