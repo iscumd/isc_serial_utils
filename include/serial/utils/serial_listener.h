@@ -56,6 +56,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
+using namespace boost::placeholders;
 
 #if SERIAL_LISTENER_DEBUG
 # warning SerialListener in debug mode
